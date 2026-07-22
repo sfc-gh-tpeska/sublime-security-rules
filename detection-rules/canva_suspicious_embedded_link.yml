@@ -11,7 +11,7 @@ source: |
                              "/html/body/script[2]"
                   ).nodes,
                   any(regex.iextract(.raw,
-                                     '\"[A-Z]\":{[^\}]+\"[a-z]\":\"(?P<display_text>[^\"]+)\"},\"[a-z]\":{[^\}]+"[a-z]":"(?<url>https:\/\/[^\s"'')\]}]+)\"'
+                                     '\"[A-Z]\":{[^\}]+\"[a-z]\":\"(?P<display_text>[^\"]+)\"},\"[a-z]\":{[^\}]+"[a-z]":"(?P<url>https:\/\/[^\s"'')\]}]+)\"'
                       ),
                       strings.parse_url(.named_groups["url"]).domain.root_domain not in (
                         "canva.com",
