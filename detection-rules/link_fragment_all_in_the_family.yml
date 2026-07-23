@@ -17,7 +17,7 @@ source: |
                 )
             )
             or any(regex.iextract(.href_url.fragment,
-                                  'Fa(?:m|rn)ily=$?(?P<email_addy>[^&]+)'
+                                  'Fa(?:m|rn)ily=\$?(?P<email_addy>[^&]+)'
                    ),
                    // plain text email addresses
                    strings.parse_email(.named_groups["email_addy"]).domain.valid
