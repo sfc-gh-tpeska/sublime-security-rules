@@ -4,10 +4,10 @@ type: "rule"
 severity: "medium"
 source: |
   type.inbound
-  and sum([length(recipients.to), length(recipients.cc)]) == 1
+  and length(flatten([recipients.to, recipients.cc])) == 1
   and (
-    sender.email.email == recipients.to[0].email.email
-    or recipients.to[0].email.domain.valid == false
+    sender.email.email == flatten([recipients.to, recipients.cc])[0].email.email
+    or flatten([recipients.to, recipients.cc])[0].email.domain.valid == false
   )
   and length(attachments) == 1
   and beta.parse_exif(attachments[0]).page_count == 1
@@ -33,9 +33,27 @@ source: |
                                  )
                           )
               ) <= 3
-              and all(.scan.url.urls,
-                      .domain.root_domain in $self_service_creation_platform_domains
-                      or .domain.domain in $self_service_creation_platform_domains
+              and all(filter(.scan.url.urls,
+                            // remove mailto: links
+                            not strings.istarts_with(.url, 'mailto:')
+                            and not strings.istarts_with(.url, 'email:')
+                            // remove links found in exiftool output producer/creator
+                            and not any([
+                                          ..scan.exiftool.producer,
+                                          ..scan.exiftool.creator
+                                        ],
+                                        . is not null
+                                        and strings.icontains(.,
+                                                              ..domain.domain
+                                        )
+                            )
+                            and not .domain.root_domain in ('pdf-tools.com')
+                            and not .url in (
+                              'https://gamma.app/?utm_source=made-with-gamma'
+                            )
+                     ),
+                     .domain.root_domain in $self_service_creation_platform_domains
+                     or .domain.domain in $self_service_creation_platform_domains
               )
           )
   )
